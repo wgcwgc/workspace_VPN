@@ -35,6 +35,8 @@
         </activity>
         <activity android:name="com.runcom.wgcwgc.business.Bind" >
         </activity>
+        <activity android:name="com.runcom.wgcwgc.business.MandatoryUpdate" >
+        </activity>
     </application>
 
 </manifest>

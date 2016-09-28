@@ -28,6 +28,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -50,6 +51,8 @@ public class Business extends Activity
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.business);
+
+		new GetThread_cheakNewVersion().start();
 
 		Toast.makeText(this ,"登录成功！！！" ,Toast.LENGTH_LONG).show();
 
@@ -328,7 +331,6 @@ public class Business extends Activity
 			String os = Build.VERSION.RELEASE;
 			int term = 0;
 			String ver = packageInfo.versionName;
-			// ver = "0." + ver;
 
 			// 用HttpClient发送请求，分为五步
 			// HttpClient httpClient = new DefaultHttpClient();
@@ -340,95 +342,131 @@ public class Business extends Activity
 			signValu = new MD5().md5(signValu).toUpperCase();
 			String url = "https://a.redvpn.cn:8443/interface/getver.php?app=" + app + "&build=" + build + "&dev=" + dev + "&lang=" + lang + "&market=" + market + "&os=" + os + "&term=" + term + "&ver=" + ver + "&sign=" + signValu;
 			// 第二步：创建代表请求的对象,参数是访问的服务器地址
-			Log.d("LOG" ,url);
-			// url = URLEncoder.encode(url);
-			// Log.d("LOG" ,url);
-			// url = toURLEncoded(url);
+			Log.d("LOG" ,"getver:\n" + url);
 			HttpGet httpGet = new HttpGet(url);
 			try
 			{
 				// 第三步：执行请求，获取服务器发还的相应对象
 				HttpResponse response = httpClient.execute(httpGet);
-				// String json_result = "";
-				// System.out.println("test00");
 				// 第四步：检查相应的状态是否正常：检查状态码的值是200表示正常
 				if(response.getStatusLine().getStatusCode() == 200)
 				{
+					// Log.d("LOG" ,"test00");
 					// 第五步：从相应对象当中取出数据，放到entity当中
 					HttpEntity entity = response.getEntity();
+					// Log.d("LOG" ,"test01");
+
 					BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
+					// Log.d("LOG" ,"test02");
+					// String jString = reader.toString();
+					// Log.d("LOG" ,jString);
+					// String json_result = reader.readLine();
+					String line = "";
+					String returnLine = "";
+					while((line = reader.readLine()) != null)
+					{
+						returnLine += line;
+						System.out.println("*" + line + "*\n");
+					}
 
-					String json_result = reader.readLine();
-					Log.d("LOG" ,"json_result:" + json_result + ":");
-					JSONObject jsonObject = new JSONObject(json_result.toString());
-					// Log.d("LOG" ,jsonObject + "***");
+					// JSONObject jsonObject = new JSONObject(json_result);
+					JSONObject jsonObject = new JSONObject(returnLine);
 
-					// Long result = (long) 0;
+					Log.d("LOG" ,"getver_result:\n" + returnLine);
+
 					Long result = jsonObject.getLong("result");
 					final String mesg = jsonObject.getString("mesg");
 					String min = jsonObject.getString("min");
 					String latest = jsonObject.getString("latest");
 					final String install = jsonObject.getString("install");
-					String content = jsonObject.getString("content");
+					final String content = jsonObject.getString("content");
 
-//					Log.d("LOG" ,json_result);
+					String [] ver_string = ver.split("\\.");
+					String [] min_string = min.split("\\.");
 
-					
-					Log.d("LOG" ,json_result);
-					// Long ver_first = Long.valueOf(ver.substring(0
-					// ,ver.indexOf(".")));
-					String [] ver_string = ver.split(".");
-					String [] min_string = min.split(".");
+					Log.d("LOG" ,"min:" + min + "\nlatest:" + latest);
 
 					Long ver_first = Long.valueOf(ver_string[0]);
 					Long ver_second = Long.valueOf(ver_string[1]);
 
-					Long min_first = Long.valueOf(min_string[0]);
+					Long min_first = Long.valueOf(min_string[0]) + 1;
 					Long min_second = Long.valueOf(min_string[1]);
-					
-					Log.d("LOG" ,"ver_first:" + ver_first + "\nver_second:" + ver_second + "\nmin_first:" + min_first + "\nmin_second:" + min_second);
-					
+
 					if(result == 0)
 					{
 
-						
 						if(ver_first < min_first || (ver_first == min_first && ver_second < min_second))
 						{
-							Toast.makeText(Business.this ,"强制更新！！！" ,Toast.LENGTH_LONG).show();
+
+							new Thread()
+							{
+								public void run()
+								{
+									runOnUiThread(new Runnable()
+									{
+										@Override
+										public void run()
+										{
+											// 强制更新
+											// new MandatoryUpdate(Business.this
+											// , content , install).show();
+											Intent intent_cheackNewVersion = new Intent(Intent.ACTION_VIEW);
+											intent_cheackNewVersion.setData(Uri.parse(install));
+											startActivity(intent_cheackNewVersion);
+											finish();
+										}
+
+									});
+								}
+							}.start();
 						}
 						else
 						{
-							AlertDialog.Builder builder = new AlertDialog.Builder(Business.this);
-							builder.setTitle("更新");
-							builder.setMessage(content);
-							builder.setCancelable(false);
-							// 确定按钮
-							builder.setPositiveButton("确定" ,new DialogInterface.OnClickListener()
+							new Thread()
 							{
-								@Override
-								public void onClick(DialogInterface dialog , int which )
+								public void run()
 								{
-									Intent intent_cheackNewVersion = new Intent(Intent.ACTION_VIEW);
-									intent_cheackNewVersion.setData(Uri.parse(install));
-									startActivity(intent_cheackNewVersion);
-									// Toast.makeText(Business.this ,"已删除"
-									// ,Toast.LENGTH_LONG).show();
-									// System.out.println("已删除-onClick,,,");
-								}
+									runOnUiThread(new Runnable()
+									{
+										@Override
+										public void run()
+										{
+											AlertDialog.Builder builder = new AlertDialog.Builder(Business.this);
+											builder.setTitle("更新");
+											builder.setMessage(content);
 
-							});
-							// 取消按钮
-							builder.setNegativeButton("取消" ,new DialogInterface.OnClickListener()
-							{
-								@Override
-								public void onClick(DialogInterface dialog , int which )
-								{
-									Toast.makeText(Business.this ,"已取消更新！！！" ,Toast.LENGTH_SHORT).show();
-									// System.out.println("已取消-onClick,,,");
-								}
-							});
+											builder.setCancelable(false);
+											// 确定按钮
+											builder.setPositiveButton("确定" ,new DialogInterface.OnClickListener()
+											{
+												@Override
+												public void onClick(DialogInterface dialog , int which )
+												{
+													Intent intent_cheackNewVersion = new Intent(Intent.ACTION_VIEW);
+													intent_cheackNewVersion.setData(Uri.parse(install));
+													startActivity(intent_cheackNewVersion);
+													finish();
+												}
 
-							builder.show();
+											});
+											// 取消按钮
+											builder.setNegativeButton("取消" ,new DialogInterface.OnClickListener()
+											{
+												@Override
+												public void onClick(DialogInterface dialog , int which )
+												{
+													Toast.makeText(Business.this ,"已取消更新！！！" ,Toast.LENGTH_SHORT).show();
+												}
+											});
+
+											builder.show();
+
+										}
+
+									});
+								}
+							}.start();
+
 						}
 					}
 					else
@@ -462,4 +500,28 @@ public class Business extends Activity
 		// TODO Auto-generated method stub
 
 	}
+
+	// 两秒内按返回键两次退出程序
+	private long exitTime = 0;
+
+	@Override
+	public boolean onKeyDown(int keyCode , KeyEvent event )
+	{
+		if(keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN)
+		{
+			if((System.currentTimeMillis() - exitTime) > 2000)
+			{
+				Toast.makeText(getApplicationContext() ,"再按一次退出程序" ,Toast.LENGTH_SHORT).show();
+				exitTime = System.currentTimeMillis();
+			}
+			else
+			{
+				finish();
+				System.exit(0);
+			}
+			return true;
+		}
+		return super.onKeyDown(keyCode ,event);
+	}
+
 }

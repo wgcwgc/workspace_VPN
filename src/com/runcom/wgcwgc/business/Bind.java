@@ -118,7 +118,7 @@ public class Bind extends Activity
 			// 第二步：创建代表请求的对象,参数是访问的服务器地址
 			// url = toURLEncoded(url);
 			// System.out.println(url);
-			Log.d("LOG" ,url);
+			Log.d("LOG" ,"Bind:\n" + url);
 			// System.out.println(new
 			// MD5().md5("runcom8888123@abc.comxyz9.3.26666").toUpperCase());
 			HttpGet httpGet = new HttpGet(url);
@@ -150,7 +150,7 @@ public class Bind extends Activity
 					// String email = jsonObject.getString("email");
 					// String session = jsonObject.getString("session");
 
-					Log.d("LOG" ,json_result);
+					Log.d("LOG" ,"Bind_result:\n" + json_result);
 					// Log.d("LOG" ,result.toString());
 					if(result == 0)
 					{
