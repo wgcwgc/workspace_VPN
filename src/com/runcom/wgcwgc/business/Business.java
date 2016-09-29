@@ -2,6 +2,7 @@ package com.runcom.wgcwgc.business;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -17,6 +18,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -31,6 +33,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,11 +49,26 @@ public class Business extends Activity
 	private TextView textView;
 	String app;
 
+	private String login , mesg , uid , expire , freetime , flow , score ,
+	        coupon , type , email , session;
+	private Long result;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState )
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.business);
+
+		ActionBar actionbar = getActionBar();
+		// 显示返回箭头默认是不显示的
+		actionbar.setDisplayHomeAsUpEnabled(false);
+		// 显示左侧的返回箭头，并且返回箭头和title一起设置，返回箭头才能显示
+		actionbar.setDisplayShowHomeEnabled(true);
+		actionbar.setDisplayUseLogoEnabled(true);
+		// 显示标题
+		actionbar.setDisplayShowTitleEnabled(true);
+		actionbar.setDisplayShowCustomEnabled(true);
+		actionbar.setTitle(" runcom ");
 
 		new GetThread_cheakNewVersion().start();
 
@@ -58,24 +76,61 @@ public class Business extends Activity
 
 		intent = getIntent();
 
-		contents = "login:\t" + intent.getStringExtra("login") + "\n";
-		contents += "pass:\t" + intent.getStringExtra("pass") + "\n";
+		login = intent.getStringExtra("login");
+		result = intent.getLongExtra("result" , -1);
+		mesg = intent.getStringExtra("mesg");
+		uid = intent.getStringExtra("uid");
+		expire = intent.getStringExtra("expire");
+		freetime = intent.getStringExtra("freetime");
+		flow = intent.getStringExtra("flow");
+		score = intent.getStringExtra("score");
+		coupon = intent.getStringExtra("coupon");
+		type = intent.getStringExtra("type");
+		email = intent.getStringExtra("email");
+		session = intent.getStringExtra("session");
 
-		contents += "reslut:\t" + intent.getLongExtra("result" , -1) + "\n";
-		contents += "mesg:\t" + intent.getStringExtra("mesg") + "\n";
-		contents += "uid:\t" + intent.getStringExtra("uid") + "\n";
-		contents += "expire:\t" + intent.getStringExtra("expire") + "\n";
-		contents += "freetime:\t" + intent.getStringExtra("freetime") + "\n";
-		contents += "flow:\t" + intent.getStringExtra("flow") + "\n";
-		contents += "score:\t" + intent.getStringExtra("score") + "\n";
-		contents += "coupon:\t" + intent.getStringExtra("coupon") + "\n";
-		contents += "type:\t" + intent.getStringExtra("type") + "\n";
-		contents += "email:\t" + intent.getStringExtra("email") + "\n";
-		contents += "session:\t" + intent.getStringExtra("session") + "\n";
+		contents = "login:\t" + login + "\nresult:\t" + result + "\nmesg:\t" + mesg + "\nuid:\t" + uid + "\nexpire:\t" + expire + "\nfreetime:\t" + freetime + "\nflow:\t" + flow + "\nscore:\t" + score + "\ncoupon:\t" + coupon + "\ntype:\t" + type + "\nemaile:\t" + email + "\nsession:\t" + session + "\n";
 
-		textView = (TextView) findViewById(R.id.textView1);
+		// contents = "login:\t" + intent.getStringExtra("login") + "\n";
+		// contents += "reslut:\t" + intent.getLongExtra("result" , -1) + "\n";
+		// contents += "mesg:\t" + intent.getStringExtra("mesg") + "\n";
+		// contents += "uid:\t" + intent.getStringExtra("uid") + "\n";
+		// contents += "expire:\t" + intent.getStringExtra("expire") + "\n";
+		// contents += "freetime:\t" + intent.getStringExtra("freetime") + "\n";
+		// contents += "flow:\t" + intent.getStringExtra("flow") + "\n";
+		// contents += "score:\t" + intent.getStringExtra("score") + "\n";
+		// contents += "coupon:\t" + intent.getStringExtra("coupon") + "\n";
+		// contents += "type:\t" + intent.getStringExtra("type") + "\n";
+		// contents += "email:\t" + intent.getStringExtra("email") + "\n";
+		// contents += "session:\t" + intent.getStringExtra("session") + "\n";
+
+		textView = (TextView) findViewById(R.id.textView_business);
 		textView.setText(contents);
 
+	}
+
+	@Override
+	public boolean onMenuOpened(int featureId , Menu menu )
+	{
+
+		if(featureId == Window.FEATURE_ACTION_BAR && menu != null)
+		{
+			if(menu.getClass().getSimpleName().equals("MenuBuilder"))
+			{
+				try
+				{
+					Method m = menu.getClass().getDeclaredMethod("setOptionalIconsVisible" ,Boolean.TYPE);
+					m.setAccessible(true);
+					m.invoke(menu ,true);
+				}
+				catch(Exception e)
+				{
+					Toast.makeText(this ,"overflow 展开显示item图标异常" ,Toast.LENGTH_LONG).show();
+				}
+			}
+		}
+
+		return super.onMenuOpened(featureId ,menu);
 	}
 
 	@Override
@@ -103,6 +158,10 @@ public class Business extends Activity
 				bind();
 				break;
 
+			case R.id.business_opinion:
+				opinion();
+				break;
+
 			case R.id.business_cheakNewVersion:
 				cheakNewVersion();
 				break;
@@ -113,8 +172,13 @@ public class Business extends Activity
 
 			case R.id.business_settings:
 				setting();
+				break;
 
-			default:
+			case android.R.id.home:
+				// actionbar的左侧图标的点击事件处理
+				// finish();
+				Toast.makeText(this ,"返回上一级" ,Toast.LENGTH_LONG).show();
+				onBackPressed();
 				break;
 		}
 
@@ -123,16 +187,35 @@ public class Business extends Activity
 
 	private void getPersonInfromation()
 	{
-		// TODO Auto-generated method stub
+		intent = new Intent();
+		intent.putExtra("login" ,login);
+		intent.putExtra("result" ,result);
+		intent.putExtra("mesg" ,mesg);
+		intent.putExtra("uid" ,uid);
+		intent.putExtra("expire" ,expire);
+		intent.putExtra("freetime" ,freetime);
+		intent.putExtra("flow" ,flow);
+		intent.putExtra("score" ,score);
+		intent.putExtra("coupon" ,coupon);
+		intent.putExtra("type" ,type);
+		intent.putExtra("email" ,email);
+		intent.putExtra("session" ,session);
 
+		intent.setClass(this ,PersonInformation.class);
+		startActivity(intent);
 	}
 
 	private void bind()
 	{
-		Toast.makeText(this ,"bind()" ,Toast.LENGTH_LONG).show();
 		Intent intent = new Intent();
 		intent.setClass(Business.this ,Bind.class);
 		startActivity(intent);
+	}
+
+	private void opinion()
+	{
+		// TODO Auto-generated method stub
+		Toast.makeText(this ,"This is opinion" ,Toast.LENGTH_LONG).show();
 	}
 
 	@SuppressLint("DefaultLocale")
@@ -383,14 +466,18 @@ public class Business extends Activity
 
 					String [] ver_string = ver.split("\\.");
 					String [] min_string = min.split("\\.");
+					String [] latest_string = latest.split("\\.");
 
 					Log.d("LOG" ,"min:" + min + "\nlatest:" + latest);
 
 					Long ver_first = Long.valueOf(ver_string[0]);
 					Long ver_second = Long.valueOf(ver_string[1]);
 
-					Long min_first = Long.valueOf(min_string[0]) + 1;
+					Long min_first = Long.valueOf(min_string[0]);// + 1;
 					Long min_second = Long.valueOf(min_string[1]);
+
+					Long latest_first = Long.valueOf(latest_string[0]);
+					Long latest_second = Long.valueOf(latest_string[1]);
 
 					if(result == 0)
 					{
@@ -421,53 +508,72 @@ public class Business extends Activity
 							}.start();
 						}
 						else
-						{
-							new Thread()
+							if((ver_first > min_first && ver_first < latest_first) || (ver_first == latest_first && ver_second < latest_second))
 							{
-								public void run()
+								new Thread()
 								{
-									runOnUiThread(new Runnable()
+									public void run()
 									{
-										@Override
-										public void run()
+										runOnUiThread(new Runnable()
 										{
-											AlertDialog.Builder builder = new AlertDialog.Builder(Business.this);
-											builder.setTitle("更新");
-											builder.setMessage(content);
-
-											builder.setCancelable(false);
-											// 确定按钮
-											builder.setPositiveButton("确定" ,new DialogInterface.OnClickListener()
+											@Override
+											public void run()
 											{
-												@Override
-												public void onClick(DialogInterface dialog , int which )
-												{
-													Intent intent_cheackNewVersion = new Intent(Intent.ACTION_VIEW);
-													intent_cheackNewVersion.setData(Uri.parse(install));
-													startActivity(intent_cheackNewVersion);
-													finish();
-												}
+												AlertDialog.Builder builder = new AlertDialog.Builder(Business.this);
+												builder.setTitle("更新");
+												builder.setMessage(content);
 
-											});
-											// 取消按钮
-											builder.setNegativeButton("取消" ,new DialogInterface.OnClickListener()
+												builder.setCancelable(false);
+												// 确定按钮
+												builder.setPositiveButton("确定" ,new DialogInterface.OnClickListener()
+												{
+													@Override
+													public void onClick(DialogInterface dialog , int which )
+													{
+														Intent intent_cheackNewVersion = new Intent(Intent.ACTION_VIEW);
+														intent_cheackNewVersion.setData(Uri.parse(install));
+														startActivity(intent_cheackNewVersion);
+														finish();
+													}
+
+												});
+												// 取消按钮
+												builder.setNegativeButton("取消" ,new DialogInterface.OnClickListener()
+												{
+													@Override
+													public void onClick(DialogInterface dialog , int which )
+													{
+														Toast.makeText(Business.this ,"已取消更新！！！" ,Toast.LENGTH_SHORT).show();
+													}
+												});
+
+												builder.show();
+
+											}
+
+										});
+									}
+								}.start();
+
+							}
+							else
+							{
+								new Thread()
+								{
+									public void run()
+									{
+										runOnUiThread(new Runnable()
+										{
+											@Override
+											public void run()
 											{
-												@Override
-												public void onClick(DialogInterface dialog , int which )
-												{
-													Toast.makeText(Business.this ,"已取消更新！！！" ,Toast.LENGTH_SHORT).show();
-												}
-											});
+												Toast.makeText(Business.this ,"已更新至最新版" ,Toast.LENGTH_LONG).show();
+											}
 
-											builder.show();
-
-										}
-
-									});
-								}
-							}.start();
-
-						}
+										});
+									}
+								}.start();
+							}
 					}
 					else
 					{
@@ -483,7 +589,7 @@ public class Business extends Activity
 			}
 			catch(Exception e)
 			{
-				Log.d("LOG" ,"1.\u5f00\u901a\u652f\u4ed8\u5b9d\u63a5\u53e3,2.\u589e\u52a0\u6d88\u606f\u63a8\u9001" + "GetThread_http_bug");
+				Log.d("LOG" ,"Business_GetThread_http_bug");
 				e.printStackTrace();
 			}
 		}
@@ -492,13 +598,13 @@ public class Business extends Activity
 	private void aboutUs()
 	{
 		// TODO Auto-generated method stub
-
+		Toast.makeText(this ,"This is aboutUs" ,Toast.LENGTH_LONG).show();
 	}
 
 	private void setting()
 	{
 		// TODO Auto-generated method stub
-
+		Toast.makeText(this ,"This is setting" ,Toast.LENGTH_LONG).show();
 	}
 
 	// 两秒内按返回键两次退出程序

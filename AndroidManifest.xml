@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="14"
+        android:minSdkVersion="16"
         android:targetSdkVersion="24" />
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -27,15 +27,24 @@
         </activity>
         <activity android:name="com.runcom.wgcwgc.business.Business" >
         </activity>
-        <activity android:name="com.runcom.wgcwgc.register.Register" >
+        <activity
+            android:name="com.runcom.wgcwgc.register.Register"
+            android:icon="@drawable/ic_launcher001"
+            android:parentActivityName="com.runcom.wgcwgc.main.MainActivity" >
         </activity>
         <activity android:name="com.runcom.wgcwgc.register.Register_01" >
         </activity>
         <activity android:name="com.runcom.wgcwgc.register.Register_02" >
         </activity>
-        <activity android:name="com.runcom.wgcwgc.business.Bind" >
+        <activity
+            android:name="com.runcom.wgcwgc.business.Bind"
+            android:icon="@drawable/ic_launcher001"
+            android:parentActivityName="com.runcom.wgcwgc.business.Business" >
         </activity>
-        <activity android:name="com.runcom.wgcwgc.business.MandatoryUpdate" >
+        <activity
+            android:name="com.runcom.wgcwgc.business.PersonInformation"
+            android:icon="@drawable/ic_launcher001"
+            android:parentActivityName="com.runcom.wgcwgc.business.Business" >
         </activity>
     </application>
 

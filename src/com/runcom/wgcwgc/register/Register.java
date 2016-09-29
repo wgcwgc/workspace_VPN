@@ -2,6 +2,7 @@ package com.runcom.wgcwgc.register;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.util.Locale;
 
 import org.apache.http.HttpEntity;
@@ -11,14 +12,21 @@ import org.apache.http.client.methods.HttpGet;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.Activity;
+import android.app.TaskStackBuilder;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,10 +53,21 @@ public class Register extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.register);
 
-		editText_login = (EditText) findViewById(R.id.bind_login);
-		editText_password = (EditText) findViewById(R.id.bind_password);
-		editText_password_resure = (EditText) findViewById(R.id.bind_oldPassword);
-		editText_email = (EditText) findViewById(R.id.bind_email);
+		ActionBar actionbar = getActionBar();
+		// 显示返回箭头默认是不显示的
+		actionbar.setDisplayHomeAsUpEnabled(false);
+		// 显示左侧的返回箭头，并且返回箭头和title一起设置，返回箭头才能显示
+		actionbar.setDisplayShowHomeEnabled(true);
+		actionbar.setDisplayUseLogoEnabled(true);
+		// 显示标题
+		actionbar.setDisplayShowTitleEnabled(true);
+		actionbar.setDisplayShowCustomEnabled(true);
+		actionbar.setTitle(" 注册 ");
+
+		editText_login = (EditText) findViewById(R.id.register_login);
+		editText_password = (EditText) findViewById(R.id.register_password);
+		editText_password_resure = (EditText) findViewById(R.id.register_password_resure);
+		editText_email = (EditText) findViewById(R.id.register_email);
 		editText_chkcode = (EditText) findViewById(R.id.register_chkcode);
 		textView_hint = (TextView) findViewById(R.id.register_hint);
 		// button_chkcode = (Button) findViewById(R.id.register_chkcodeButton);
@@ -170,11 +189,6 @@ public class Register extends Activity
 			// HttpClient httpClient = new DefaultHttpClient();
 			HttpClient httpClient = SSLSocketFactoryEx.getNewHttpClient();// getNewHttpClient
 
-			// https://a.redvpn.cn:8443/interface/
-			// *************************************************************************************************************************************
-
-			// term = 0;
-			// os = Build.VERSION.RELEASE;
 			dev = android.provider.Settings.Secure.getString(Register.this.getContentResolver() ,android.provider.Settings.Secure.ANDROID_ID);
 
 			String signValu = "tuoyouvpn" + app + build + chkcode + dev + email + lang + account + market + os + password + term + ver;
@@ -182,11 +196,7 @@ public class Register extends Activity
 			// Log.d("LOG" ,signValu);
 			String url = "https://a.redvpn.cn:8443/interface/newUser.php?login=" + account + "&pass=" + password + "&chkcode=" + chkcode + "&email=" + email + "&app=" + app + "&build=" + build + "&dev=" + dev + "&lang=" + lang + "&market=" + market + "&os=" + os + "&term=" + term + "&ver=" + ver + "&sign=" + signValu;
 			// 第二步：创建代表请求的对象,参数是访问的服务器地址
-			// url = toURLEncoded(url);
-			// System.out.println(url);
 			Log.d("LOG" ,url);
-			// System.out.println(new
-			// MD5().md5("runcom8888123@abc.comxyz9.3.26666").toUpperCase());
 			HttpGet httpGet = new HttpGet(url);
 			try
 			{
@@ -237,7 +247,7 @@ public class Register extends Activity
 										String contents = "请仔细核对信息\n账号：\n\t\t\t\t" + login + "\n密码：\n\t\t\t\t" + password + "\n邮箱：\n\t\t\t\t" + email;
 										// System.out.println(contents);
 										Toast.makeText(Register.this ,contents ,Toast.LENGTH_LONG).show();
-										
+
 										Toast.makeText(Register.this ,"恭喜您： " + "\n\t\t\t\t注册成功！！！" ,Toast.LENGTH_LONG).show();
 										finish();
 									}
@@ -297,7 +307,7 @@ public class Register extends Activity
 					// startActivity(intent);
 					// Toast.makeText(Register.this ,"恭喜您\n\t注册成功！！！"
 					// ,Toast.LENGTH_LONG).show();
-//					finish();
+					// finish();
 					// System.out.println("test02");
 
 				}
@@ -473,6 +483,68 @@ public class Register extends Activity
 			}
 		}
 
+	}
+
+	@Override
+	public boolean onMenuOpened(int featureId , Menu menu )
+	{
+
+		if(featureId == Window.FEATURE_ACTION_BAR && menu != null)
+		{
+			if(menu.getClass().getSimpleName().equals("MenuBuilder"))
+			{
+				try
+				{
+					Method m = menu.getClass().getDeclaredMethod("setOptionalIconsVisible" ,Boolean.TYPE);
+					m.setAccessible(true);
+					m.invoke(menu ,true);
+				}
+				catch(Exception e)
+				{
+					Toast.makeText(this ,"overflow 展开显示item图标异常" ,Toast.LENGTH_LONG).show();
+				}
+			}
+		}
+
+		return super.onMenuOpened(featureId ,menu);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu )
+	{
+		// getMenuInflater().inflate(R.menu.main ,menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item )
+	{
+
+		switch(item.getItemId())
+		{
+			case android.R.id.home:
+				// actionbar的左侧图标的点击事件处理
+				// finish();
+				Toast.makeText(this ,"返回上一级" ,Toast.LENGTH_LONG).show();
+				onBackPressed();
+				break;
+
+			case R.id.action_settings:
+				Intent upIntent = NavUtils.getParentActivityIntent(this);
+				if(NavUtils.shouldUpRecreateTask(this ,upIntent))
+				{
+					TaskStackBuilder.create(this).addNextIntentWithParentStack(upIntent).startActivities();
+				}
+				else
+				{
+					upIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					NavUtils.navigateUpTo(this ,upIntent);
+				}
+				Toast.makeText(this ,"返回首页" ,Toast.LENGTH_LONG).show();
+				return true;
+
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 }
