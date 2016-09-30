@@ -38,6 +38,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.runcom.wgcwgc.R;
+import com.runcom.wgcwgc.main.MainActivity;
 import com.runcom.wgcwgc.md5.MD5;
 import com.runcom.wgcwgc.position.Coordinate;
 import com.runcom.wgcwgc.position.Coordinate_1;
@@ -172,6 +173,10 @@ public class Business extends Activity
 			case R.id.business_aboutUs:
 				aboutUs();
 				break;
+				
+			case R.id.business_exit:
+				exit();
+				break;
 
 			case R.id.business_settings:
 				setting();
@@ -187,6 +192,15 @@ public class Business extends Activity
 
 		return super.onOptionsItemSelected(item);
 	}
+
+	private void exit()
+    {
+	    // TODO Auto-generated method stub
+	    Business.this.finish();
+	    intent = new Intent();
+	    intent.setClass(this ,MainActivity.class);
+	    startActivity(intent);
+    }
 
 	private void getPersonInfromation()
 	{
