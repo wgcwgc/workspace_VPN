@@ -39,6 +39,8 @@ import android.widget.Toast;
 
 import com.runcom.wgcwgc.R;
 import com.runcom.wgcwgc.md5.MD5;
+import com.runcom.wgcwgc.position.Coordinate;
+import com.runcom.wgcwgc.position.Coordinate_1;
 import com.runcom.wgcwgc.web.SSLSocketFactoryEx;
 
 public class Business extends Activity
@@ -105,6 +107,7 @@ public class Business extends Activity
 		// contents += "session:\t" + intent.getStringExtra("session") + "\n";
 
 		textView = (TextView) findViewById(R.id.textView_business);
+
 		textView.setText(contents);
 
 	}
@@ -598,13 +601,20 @@ public class Business extends Activity
 	private void aboutUs()
 	{
 		// TODO Auto-generated method stub
-		Toast.makeText(this ,"This is aboutUs" ,Toast.LENGTH_LONG).show();
+		// Toast.makeText(this ,"This is aboutUs" ,Toast.LENGTH_LONG).show();
+		intent = new Intent();
+		intent.setClass(this ,Coordinate_1.class);
+		startActivity(intent);
 	}
 
 	private void setting()
 	{
 		// TODO Auto-generated method stub
-		Toast.makeText(this ,"This is setting" ,Toast.LENGTH_LONG).show();
+		// Toast.makeText(this ,"This is setting" ,Toast.LENGTH_LONG).show();
+		intent = new Intent();
+		intent.setClass(this ,Coordinate.class);
+		startActivity(intent);
+
 	}
 
 	// 两秒内按返回键两次退出程序

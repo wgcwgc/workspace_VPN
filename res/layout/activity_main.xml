@@ -33,7 +33,6 @@
         android:layout_marginLeft="77dp"
         android:layout_marginStart="77dp"
         android:layout_marginTop="57dp"
-        
         android:onClick="login"
         android:text="@string/main_login" />
 
@@ -49,7 +48,9 @@
         android:ems="10"
         android:focusableInTouchMode="true"
         android:hint="@string/main_account_hint"
-        android:selectAllOnFocus="true" />
+        android:inputType="textAutoComplete"
+        android:selectAllOnFocus="true"
+        android:textStyle="normal" />
 
     <EditText
         android:id="@+id/main_editText_password"
