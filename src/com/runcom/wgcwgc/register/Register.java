@@ -51,7 +51,7 @@ public class Register extends Activity
 	protected void onCreate(Bundle savedInstanceState )
 	{
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.register);
+		setContentView(R.layout.register_backups);
 
 		ActionBar actionbar = getActionBar();
 		// 显示返回箭头默认是不显示的

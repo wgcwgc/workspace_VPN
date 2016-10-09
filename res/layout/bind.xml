@@ -12,7 +12,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="17dp"
+        android:layout_marginTop="7dp"
         android:hint="@string/bind_login_hint"
         android:inputType="textAutoComplete"
         android:selectAllOnFocus="true"
@@ -28,7 +28,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/bind_login"
-        android:layout_marginTop="27dp"
+        android:layout_marginTop="17dp"
         android:ems="10"
         android:hint="@string/bind_password_hint"
         android:inputType="textPassword"
@@ -39,7 +39,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/bind_password"
-        android:layout_marginTop="27dp"
+        android:layout_marginTop="7dp"
         android:hint="@string/bind_modify_hint"
         android:textColor="#FF0000"
         android:textSize="12sp" />
@@ -53,7 +53,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/bind_password"
-        android:layout_marginTop="87dp"
+        android:layout_marginTop="57dp"
         android:ems="10"
         android:hint="@string/bind_oldPassword_hint"
         android:inputType="textPassword"
@@ -68,7 +68,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/bind_oldPassword"
-        android:layout_marginTop="17dp"
+        android:layout_marginTop="7dp"
         android:hint="@string/bind_email_hint"
         android:inputType="textWebEmailAddress"
         android:textSize="12sp" />
@@ -83,8 +83,8 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="130dp"
         android:layout_marginStart="130dp"
-        android:onClick="submit"
         android:layout_marginTop="17dp"
+        android:onClick="submit"
         android:text="@string/bind_submitBotton" />
 
 </RelativeLayout>
