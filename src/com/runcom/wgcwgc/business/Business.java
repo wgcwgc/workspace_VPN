@@ -82,7 +82,7 @@ public class Business extends Activity
 
 		login = intent.getStringExtra("login");
 		actionbar.setTitle(login);
-//		actionbar.set
+		// actionbar.set
 		result = intent.getLongExtra("result" , -1);
 		mesg = intent.getStringExtra("mesg");
 		uid = intent.getStringExtra("uid");
@@ -111,7 +111,8 @@ public class Business extends Activity
 		// contents += "session:\t" + intent.getStringExtra("session") + "\n";
 
 		getsvrlist(uid ,type);
-		getproducts(uid , type);
+		getproducts(uid ,type);
+		getconfig(uid);
 
 		textView = (TextView) findViewById(R.id.textView_business);
 
@@ -119,12 +120,142 @@ public class Business extends Activity
 
 	}
 
+	private void getconfig(String uid )
+	{
+		GetThread_getconfig getThread_getconfig = new GetThread_getconfig(uid);
+		getThread_getconfig.start();
+	}
+
+	class GetThread_getconfig extends Thread
+	{
+
+		String uid;
+
+		public GetThread_getconfig()
+		{
+
+		}
+
+		public GetThread_getconfig(String uid)
+		{
+			this.uid = uid;
+
+		}
+
+		@SuppressLint("DefaultLocale")
+		@Override
+		public void run()
+		{
+			// Log.d("LOG" ,"getsvrlist beginning,,,");
+			PackageManager packageManager = Business.this.getPackageManager();
+			PackageInfo packageInfo = null;
+			try
+			{
+				packageInfo = packageManager.getPackageInfo(Business.this.getPackageName() ,0);
+				int labelRes = packageInfo.applicationInfo.labelRes;
+				app = Business.this.getResources().getString(labelRes);
+			}
+			catch(NameNotFoundException e)
+			{
+				Log.d("LOG" ,"Business_getconfig_serverJudge_package_exception:\n" + e.toString());
+			}
+			String build = "57";
+			String dev = android.provider.Settings.Secure.getString(Business.this.getContentResolver() ,android.provider.Settings.Secure.ANDROID_ID);
+			String lang = Locale.getDefault().getLanguage();
+			int market = 2;
+			String os = Build.VERSION.RELEASE;
+			int term = 0;
+			String ver = packageInfo.versionName;
+
+			// 用HttpClient发送请求，分为五步
+			// HttpClient httpClient = new DefaultHttpClient();
+			HttpClient httpClient = SSLSocketFactoryEx.getNewHttpClient();// getNewHttpClient
+
+			dev = android.provider.Settings.Secure.getString(Business.this.getContentResolver() ,android.provider.Settings.Secure.ANDROID_ID);
+
+			String signValu = "tuoyouvpn" + app + build + dev + lang + market + os + term + uid + ver;
+			signValu = new MD5().md5(signValu).toUpperCase();
+			// Log.d("LOG" ,signValu);
+			String url = "https://a.redvpn.cn:8443/interface/getconfig.php?app=" + app + "&build=" + build + "&uid=" + uid + "&dev=" + dev + "&lang=" + lang + "&market=" + market + "&os=" + os + "&term=" + term + "&ver=" + ver + "&sign=" + signValu;
+			// 第二步：创建代表请求的对象,参数是访问的服务器地址
+			Log.d("LOG" ,"Business_getconfig_url:\n" + url);
+			HttpGet httpGet = new HttpGet(url);
+			try
+			{
+//				Log.d("LOG" , "start1,,,");
+				// 第三步：执行请求，获取服务器发还的相应对象
+				HttpResponse response = httpClient.execute(httpGet);
+				// System.out.println("test00");
+				// 第四步：检查相应的状态是否正常：检查状态码的值是200表示正常
+				if(response.getStatusLine().getStatusCode() == 200)
+				{
+//					Log.d("LOG" , "start2,,,");
+					// 第五步：从相应对象当中取出数据，放到entity当中
+					// System.out.println("test01");
+					HttpEntity entity = response.getEntity();
+					BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
+					// String json_result = reader.readLine();
+					// JSONObject jsonObject = new JSONObject(json_result);
+
+					String line = "";
+					String returnLine = "";
+					while((line = reader.readLine()) != null)
+					{
+//						Log.d("LOG" , "start3,,,");
+						returnLine += line;
+						System.out.println("*" + line + "*\n");
+					}
+//					Log.d("LOG" , "start4,,,");
+					JSONObject jsonObject = new JSONObject(returnLine);
+					// String result = jsonObject.getString("result");
+					Long result = jsonObject.getLong("result");
+					final String mesg = jsonObject.getString("mesg");
+					JSONObject jsonObject_config = jsonObject.getJSONObject("config");
+					
+					
+					
+//					JSONArray config_list_Array = jsonObject.getJSONArray("config");
+//					int leng = config_list_Array.length();
+
+					
+//					Log.d("LOG" , "result:" + result + "\nmesg:" + mesg + "\njsonObject_config:" + jsonObject_config);
+					if(result == 0)
+					{
+						Log.d("LOG" , "Business_getconfig_result:\n" + "result:" + result + "\nmesg:" + mesg + "\njsonObject_config:" + jsonObject_config);
+//						List < String > config_list = new ArrayList < String >();
+//						for(int i = 0 ; i < config_list_Array.length() ; i ++ )
+//						{
+//
+//							config_list.add(config_list_Array.getString(i));
+//							Log.d("LOG" ,config_list.get(i));
+//						}
+
+						// JSONObject jsonObject2 = new
+						// JSONObject(products_list.get(0).toString());
+						// Log.d("LOG" , "id:" + jsonObject2.getString("id"));
+
+//						Log.d("LOG" ,"Business_getconfig_response:\n" + "result:" + result + "\nmesg:" + mesg + "\nconfig:" + config_list_Array + "\nleng:" + leng);
+
+					}
+
+				}
+			}
+			catch(Exception e)
+			{
+//				Log.d("LOG" ,"Business_getconfig_GetThread_submit_http_bug:\n" + e.toString());
+				e.printStackTrace();
+			}
+
+		}
+
+	}
+
 	private void getproducts(String uid , String type )
-    {
+	{
 		GetThread_getproducts getThread_getproducts = new GetThread_getproducts(uid , type);
 		getThread_getproducts.start();
-    }
-	
+	}
+
 	class GetThread_getproducts extends Thread
 	{
 
@@ -143,10 +274,11 @@ public class Business extends Activity
 
 		}
 
-		@SuppressLint("DefaultLocale") @Override
+		@SuppressLint("DefaultLocale")
+		@Override
 		public void run()
 		{
-//			Log.d("LOG" ,"getsvrlist beginning,,,");
+			// Log.d("LOG" ,"getsvrlist beginning,,,");
 			PackageManager packageManager = Business.this.getPackageManager();
 			PackageInfo packageInfo = null;
 			try
@@ -192,9 +324,9 @@ public class Business extends Activity
 					// System.out.println("test01");
 					HttpEntity entity = response.getEntity();
 					BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
-//					String json_result = reader.readLine();
-//					JSONObject jsonObject = new JSONObject(json_result);
-					
+					// String json_result = reader.readLine();
+					// JSONObject jsonObject = new JSONObject(json_result);
+
 					String line = "";
 					String returnLine = "";
 					while((line = reader.readLine()) != null)
@@ -208,23 +340,25 @@ public class Business extends Activity
 					final String mesg = jsonObject.getString("mesg");
 					JSONArray products_list_Array = jsonObject.getJSONArray("products");
 					int leng = products_list_Array.length();
-					
-					List < String > products_list = new ArrayList < String >();
-					for(int i = 0 ; i < products_list_Array.length() ; i ++ )
-                    {
-						
-						products_list.add(products_list_Array.getString(i));
-	                    Log.d("LOG" , products_list.get(i));
-                    }
-					
-//					JSONObject jsonObject2 = new JSONObject(products_list.get(0).toString());
-//					Log.d("LOG" , "id:" + jsonObject2.getString("id"));
-					
-					
-					
-					Log.d("LOG" , "Business_getproducts_response:\n" + "result:" + result + "\nmesg:" + mesg + "\nproducts:" + products_list_Array + "\nleng:" + leng);
-					
-					
+
+					if(result == 0)
+					{
+						List < String > products_list = new ArrayList < String >();
+						for(int i = 0 ; i < products_list_Array.length() ; i ++ )
+						{
+
+							products_list.add(products_list_Array.getString(i));
+							Log.d("LOG" ,products_list.get(i));
+						}
+
+						// JSONObject jsonObject2 = new
+						// JSONObject(products_list.get(0).toString());
+						// Log.d("LOG" , "id:" + jsonObject2.getString("id"));
+
+						Log.d("LOG" ,"Business_getproducts_response:\n" + "result:" + result + "\nmesg:" + mesg + "\nproducts:" + products_list_Array + "\nleng:" + leng);
+
+					}
+
 				}
 			}
 			catch(Exception e)
@@ -236,7 +370,6 @@ public class Business extends Activity
 		}
 
 	}
-	
 
 	private void getsvrlist(String uid , String type )
 	{
@@ -263,10 +396,11 @@ public class Business extends Activity
 
 		}
 
-		@SuppressLint("DefaultLocale") @Override
+		@SuppressLint("DefaultLocale")
+		@Override
 		public void run()
 		{
-//			Log.d("LOG" ,"getsvrlist beginning,,,");
+			// Log.d("LOG" ,"getsvrlist beginning,,,");
 			PackageManager packageManager = Business.this.getPackageManager();
 			PackageInfo packageInfo = null;
 			try
@@ -312,9 +446,9 @@ public class Business extends Activity
 					// System.out.println("test01");
 					HttpEntity entity = response.getEntity();
 					BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
-//					String json_result = reader.readLine();
-//					JSONObject jsonObject = new JSONObject(json_result);
-					
+					// String json_result = reader.readLine();
+					// JSONObject jsonObject = new JSONObject(json_result);
+
 					String line = "";
 					String returnLine = "";
 					while((line = reader.readLine()) != null)
@@ -328,23 +462,25 @@ public class Business extends Activity
 					final String mesg = jsonObject.getString("mesg");
 					JSONArray svrlistArray = jsonObject.getJSONArray("svrlist");
 					int leng = svrlistArray.length();
-					
-					List < String > server_list = new ArrayList < String >();
-					for(int i = 0 ; i < svrlistArray.length() ; i ++ )
-                    {
-						
-						server_list.add(svrlistArray.getString(i));
-//	                    Log.d("LOG" , server_list.get(i));
-                    }
-					
-					JSONObject jsonObject2 = new JSONObject(server_list.get(0).toString());
-					Log.d("LOG" , "id:" + jsonObject2.getString("id"));
-					
-					
-					
-					Log.d("LOG" , "Business_getsvrlist_response:\n" + "result:" + result + "\nmesg:" + mesg + "\nsvrlistArray:" + svrlistArray + "\nleng:" + leng);
-					
-					
+
+					if(result == 0)
+					{
+						List < String > server_list = new ArrayList < String >();
+						for(int i = 0 ; i < svrlistArray.length() ; i ++ )
+						{
+
+							server_list.add(svrlistArray.getString(i));
+							// Log.d("LOG" , server_list.get(i));
+						}
+
+						JSONObject jsonObject2 = new JSONObject(server_list.get(0).toString());
+
+						Log.d("LOG" ,"Business_getsvrlist_response:\n" + "result:" + result + "\nmesg:" + mesg + "\nsvrlistArray:" + svrlistArray + "\nleng:" + leng);
+
+						Log.d("LOG" ,"id:" + jsonObject2.getString("id"));
+
+					}
+
 				}
 			}
 			catch(Exception e)
@@ -439,7 +575,6 @@ public class Business extends Activity
 
 	private void exit()
 	{
-		// TODO Auto-generated method stub
 		Business.this.finish();
 		intent = new Intent();
 		intent.setClass(this ,MainActivity.class);
